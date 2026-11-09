@@ -21,7 +21,7 @@ html{scroll-behavior:auto;background:var(--bg)}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 #world{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0}
 .vignette{position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(6,6,7,.55) 75%,rgba(6,6,7,.92) 100%)}
-.grain{position:fixed;inset:-50%;pointer-events:none;z-index:2;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 1.2s steps(6) infinite}
+.grain{position:fixed;inset:-50%;pointer-events:none;z-index:2;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
 
 /* nav */
@@ -93,7 +93,7 @@ html[dir=rtl] .meta{font-family:var(--font);font-size:13px}
 .dl-head{text-align:center;max-width:720px;margin:0 auto 46px}
 .panel{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
 @media (max-width:900px){.panel{grid-template-columns:1fr}}
-.card{border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(16,16,19,.72);backdrop-filter:blur(14px);padding:26px}
+.card{border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(16,16,19,.94);padding:26px}
 .card h3{font-size:22px;font-weight:800;letter-spacing:-.01em}
 .sub{color:var(--muted);font-size:13.5px;margin-top:4px}
 #reel{width:100%;height:170px;display:block;margin:20px 0 6px;border-radius:12px;background:#0B0B0D;border:1px solid var(--line)}
@@ -337,7 +337,9 @@ fetch(`https://api.github.com/repos/${REPO}/releases`).then(r => r.ok ? r.json()
   let w, h, t0 = performance.now();
   function size(){ const r = c.getBoundingClientRect(), d = devicePixelRatio||1; c.width = r.width*d; c.height = r.height*d; w = c.width; h = c.height; g.setTransform(1,0,0,1,0,0); }
   addEventListener('resize', size); size();
+  let reelOn = false; new IntersectionObserver(e => { if (e[0].isIntersecting && !reelOn) t0 = performance.now(); reelOn = e[0].isIntersecting; }).observe(c);
   function draw(t){
+    if (!reelOn){ requestAnimationFrame(draw); return; }
     const d = devicePixelRatio||1, s = (t - t0)/1000;
     g.clearRect(0,0,w,h);
     const pad = 22*d, base = h - 34*d;
@@ -374,6 +376,15 @@ fetch(`https://api.github.com/repos/${REPO}/releases`).then(r => r.ok ? r.json()
 })();
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+/* buttery smooth scrolling (wheel + touch), anchor links glide too */
+if (window.Lenis && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const lenis = window.lenis = new Lenis({ duration: 1.25, easing: t => 1 - Math.pow(1 - t, 4), smoothWheel: true, wheelMultiplier: .9 });
+  (function raf(t){ lenis.raf(t); requestAnimationFrame(raf); })(0);
+  document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => { const el = document.querySelector(a.getAttribute('href')); if (el){ e.preventDefault(); lenis.scrollTo(el, { duration: 2.2 }); } }));
+}
+</script>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }</script>
 <script type="module">
 import * as THREE from 'three';
@@ -381,8 +392,8 @@ import * as THREE from 'three';
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = innerWidth < 760;
 const canvas = document.getElementById('world');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: devicePixelRatio < 1.5, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 1.25));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -599,15 +610,23 @@ function sampleKeys(p){
   let k = (p - p0)/(p1 - p0); k = Math.max(0, Math.min(1, k)); k = k*k*(3-2*k);
   return { pos: v3(a0).lerp(v3(a1), k), look: v3(t0).lerp(v3(t1), k) };
 }
+// Chapter boxes are measured once (and on resize) instead of every frame.
+const chBox = {};
+function measureChapters(){ document.querySelectorAll('.chapter').forEach(el => chBox[el.id] = { top: el.offsetTop, h: el.offsetHeight }); }
+measureChapters(); addEventListener('resize', measureChapters); addEventListener('load', measureChapters);
+let scrollPos = scrollY;
 function chapterProgress(id){
-  const el = document.getElementById(id); const r = el.getBoundingClientRect();
-  return Math.max(0, Math.min(1, -r.top / Math.max(1, r.height - innerHeight)));
+  const b = chBox[id]; if (!b) return 0;
+  return Math.max(0, Math.min(1, (scrollPos - b.top) / Math.max(1, b.h - innerHeight)));
 }
 
 let scrollP = 0, smoothP = 0, mouse = { x:0, y:0 }, sm = { x:0, y:0 };
 const mainEl = document.querySelector('main');
+let worldVisible = true;
 function readScroll(){
+  scrollPos = scrollY;
   const end = mainEl.offsetTop + mainEl.offsetHeight - innerHeight;
+  worldVisible = scrollY < end + innerHeight * 1.1; // download section covers the 3D world after this
   scrollP = Math.max(0, Math.min(1, scrollY / Math.max(1, end)));
   const total = document.documentElement.scrollHeight - innerHeight;
   document.getElementById('scrub').style.width = (scrollY/Math.max(1,total)*100) + '%';
@@ -620,10 +639,17 @@ addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camer
 
 const tcVal = document.getElementById('tcVal'), tcScene = document.getElementById('tcScene');
 const clock = new THREE.Clock();
-let clipCursor = 0;
+let clipCursor = 0, lastClipTick = -1, lastAnnot = -1;
+const frustum = new THREE.Frustum(), projM = new THREE.Matrix4(), tmpV = new THREE.Vector3();
+function inView(obj, maxDist){
+  obj.getWorldPosition(tmpV);
+  return tmpV.distanceTo(camera.position) < maxDist && frustum.containsPoint(tmpV);
+}
 function frame(){
+  requestAnimationFrame(frame);
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
-  smoothP += (scrollP - smoothP) * (reduce ? 1 : Math.min(1, dt*4.5));
+  if (!worldVisible || document.hidden) return;
+  smoothP += (scrollP - smoothP) * (reduce ? 1 : 1 - Math.exp(-dt*7));
   sm.x += (mouse.x - sm.x) * Math.min(1, dt*3); sm.y += (mouse.y - sm.y) * Math.min(1, dt*3);
 
   const { pos, look } = sampleKeys(smoothP);
@@ -640,7 +666,8 @@ function frame(){
   hero.position.z = -6 - smoothP*30; hero.rotation.y = sm.x*.12; hero.rotation.x = sm.y*.06;
 
   // chapter animations
-  drawAnnot(chapterProgress('ch-annotate'));
+  const pa0 = chapterProgress('ch-annotate');
+  if (Math.abs(pa0 - lastAnnot) > .002){ lastAnnot = pa0; drawAnnot(pa0); }
   const pv = chapterProgress('ch-versions'), ev = 1 - Math.pow(1 - pv, 3);
   versions.forEach((f,i) => { f.position.set(-1.2 - i*ev*2.3, i*ev*.3 - .2*ev, -62 + i*ev*2.2); f.rotation.y = .45*ev + i*.06*ev; });
   const pc = chapterProgress('ch-compare'), ec = Math.min(1, pc*1.6), ec2 = 1 - Math.pow(1-ec,3);
@@ -655,15 +682,17 @@ function frame(){
 
   // film strips scroll; dust drifts
   strips.forEach((s,i) => s.t.offset.x = (t*.04*(i?1:-1)));
-  const pa = dust.geometry.attributes.position.array;
-  for (let i=0;i<dustN;i++){ pa[i*3+1] += Math.sin(t*.3 + i)*.0015; }
-  dust.geometry.attributes.position.needsUpdate = true;
+  dust.position.y = Math.sin(t*.25)*.25; dust.rotation.z = Math.sin(t*.05)*.02;
 
-  // update a few clip textures per frame (round-robin) to keep it smooth
-  const visible = [hero, annot, ...versions, cmpA, cmpB, reportFrame];
-  visible.forEach(f => f.userData.clip.draw(t));
-  const per = mobile ? 3 : 6;
-  for (let k=0;k<per;k++){ const c = clips[clipCursor++ % clips.length]; c.draw(t); }
+  // "Footage" plays at 24 fps like real clips, and only clips on screen are redrawn.
+  camera.updateMatrixWorld(); projM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); frustum.setFromProjectionMatrix(projM);
+  const tick = Math.floor(t*24);
+  if (tick !== lastClipTick){
+    lastClipTick = tick;
+    [hero, annot, ...versions, cmpA, cmpB, reportFrame].forEach(f => { if (inView(f, 30)) f.userData.clip.draw(t); });
+    const per = mobile ? 2 : 4; let done = 0;
+    for (let k=0; k<ambient.length && done<per; k++){ const f = ambient[clipCursor++ % ambient.length]; if (inView(f, 24)){ f.userData.clip.draw(t); done++; } }
+  }
 
   // timecode readout follows scroll like a scrub
   const fr = Math.floor(smoothP * 24 * 90);
@@ -672,7 +701,6 @@ function frame(){
   tcScene.textContent = 'SC 0' + sc;
 
   renderer.render(scene, camera);
-  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 
@@ -682,7 +710,8 @@ requestAnimationFrame(frame);
   function size(){ const r = c.getBoundingClientRect(), d = devicePixelRatio||1; c.width = r.width*d; c.height = r.height*d; }
   addEventListener('resize', size); size();
   const src = hero.userData.clip.canvas;
-  (function loop(){ g.drawImage(src, 0, 0, c.width, c.height); requestAnimationFrame(loop); })();
+  let on = false, last = 0; new IntersectionObserver(e => on = e[0].isIntersecting).observe(c);
+  (function loop(t){ requestAnimationFrame(loop); if (!on || t - last < 41) return; last = t; hero.userData.clip.draw(t/1000); g.drawImage(src, 0, 0, c.width, c.height); })(0);
 })();
 </script>
 </body>
