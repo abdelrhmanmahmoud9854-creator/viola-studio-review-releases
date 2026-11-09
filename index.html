@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIOLA STUDIO REVIEW — frame-accurate review for animation and VFX</title>
+<meta name="description" content="Local-first desktop review workstation for animation and VFX: frame annotations, versions, compare and reports. Free for Windows.">
+<link rel="icon" href="assets/app-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060607; --ink:#E9E9EE; --muted:#8D8D99; --line:#26262B;
+  --orange:#EA580C; --amber:#FFA726; --gold:#FFE082; --ember:#2A1608;
+  --font:'Plus Jakarta Sans',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+html[dir=rtl]{ --font:'Tajawal','Plus Jakarta Sans',system-ui,sans-serif; }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:auto;background:var(--bg)}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+#world{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(6,6,7,.55) 75%,rgba(6,6,7,.92) 100%)}
+.grain{position:fixed;inset:-50%;pointer-events:none;z-index:2;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 1.2s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
+
+/* nav */
+nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:14px;padding:8px 8px 8px 14px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(14,14,16,.55);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);width:min(860px,calc(100vw - 32px))}
+html[dir=rtl] nav{padding:8px 14px 8px 8px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:13.5px;letter-spacing:.02em;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap}
+.brand img{width:26px;height:26px;border-radius:7px}
+.ver{font-family:var(--mono);font-size:11px;color:var(--amber);border:1px solid rgba(234,88,12,.4);background:rgba(234,88,12,.1);padding:3px 8px;border-radius:999px;line-height:1}
+.navlinks{display:flex;gap:4px;margin-inline-start:auto}
+.navlinks a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;padding:8px 12px;border-radius:999px;transition:.2s;line-height:1}
+.navlinks a:hover{color:var(--ink);background:rgba(255,255,255,.06)}
+.lang{height:34px;min-width:38px;padding:0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--ink);font:700 13px var(--font);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.2s}
+.lang:hover{border-color:rgba(255,255,255,.3)}
+.get{height:34px;padding:0 16px;border-radius:999px;background:var(--orange);color:#1a0a02;font-weight:800;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;line-height:1;transition:.2s}
+.get:hover{background:#f26a1f;box-shadow:0 0 0 4px rgba(234,88,12,.18)}
+@media (max-width:760px){.navlinks{display:none}.brand span.name{display:none}}
+
+/* chapters */
+main{position:relative;z-index:5}
+.chapter{min-height:180vh;position:relative}
+.chapter .stick{position:sticky;top:0;height:100vh;display:flex;align-items:center;padding:0 max(24px,6vw);pointer-events:none}
+.chapter.right .stick{justify-content:flex-end}
+html[dir=rtl] .chapter.right .stick{justify-content:flex-start}
+html[dir=rtl] .chapter:not(.right):not(.center) .stick{justify-content:flex-end}
+.chapter.center .stick{justify-content:center;text-align:center}
+.chapter.center .copy{max-width:760px;position:relative}
+.chapter.center .copy::before{content:"";position:absolute;inset:-90px -140px;z-index:-1;background:radial-gradient(ellipse at center,rgba(6,6,7,.82) 0%,rgba(6,6,7,.55) 45%,transparent 72%);pointer-events:none}
+.chapter:not(.center) .copy{position:relative}
+.chapter:not(.center) .copy::before{content:"";position:absolute;inset:-120px -160px;z-index:-1;background:radial-gradient(ellipse at center,rgba(6,6,7,.78) 0%,rgba(6,6,7,.5) 50%,transparent 75%);pointer-events:none}
+.copy h1,.copy h2,.copy .lede{text-shadow:0 2px 24px rgba(0,0,0,.65)}
+.copy{max-width:470px;pointer-events:auto;opacity:0;transform:translateY(30px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.copy.in{opacity:1;transform:none}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);padding:6px 12px 6px 10px;border:1px solid rgba(234,88,12,.35);border-radius:999px;background:rgba(234,88,12,.08);line-height:1}
+html[dir=rtl] .eyebrow{font-family:var(--font);letter-spacing:0;font-weight:700;font-size:13px;padding:6px 10px 6px 12px}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 0 rgba(234,88,12,.6);animation:rec 1.6s infinite}
+@keyframes rec{0%{box-shadow:0 0 0 0 rgba(234,88,12,.6)}70%{box-shadow:0 0 0 9px rgba(234,88,12,0)}100%{box-shadow:0 0 0 0 rgba(234,88,12,0)}}
+h1{font-size:clamp(44px,7.4vw,96px);line-height:.98;font-weight:800;letter-spacing:-.035em;margin:22px 0 18px}
+html[dir=rtl] h1{letter-spacing:0;line-height:1.15}
+h2{font-size:clamp(34px,4.6vw,60px);line-height:1.02;font-weight:800;letter-spacing:-.03em;margin:18px 0 14px}
+html[dir=rtl] h2{letter-spacing:0;line-height:1.2}
+.grad{background:linear-gradient(100deg,#FFE082 0%,#FFA726 35%,#EA580C 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:clamp(16px,1.35vw,19px);line-height:1.6;color:#B9B9C4;max-width:560px}
+.chapter.center .lede{margin:0 auto}
+.ctas{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+.chapter.center .ctas{justify-content:center}
+.btn{height:52px;padding:0 24px;border-radius:14px;font-weight:800;font-size:15px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;line-height:1;transition:transform .2s,box-shadow .2s,background .2s;position:relative;overflow:hidden}
+.btn.primary{background:linear-gradient(180deg,#F26A1F,#EA580C);color:#1a0a02;box-shadow:0 10px 40px -10px rgba(234,88,12,.7)}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 16px 50px -10px rgba(234,88,12,.85)}
+.btn.primary::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);transform:translateX(-120%);animation:sheen 3.6s ease-in-out infinite}
+@keyframes sheen{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+.btn.ghost{border:1px solid rgba(255,255,255,.16);color:var(--ink);background:rgba(255,255,255,.03);backdrop-filter:blur(8px)}
+.btn.ghost:hover{border-color:rgba(255,255,255,.35);transform:translateY(-2px)}
+.meta{margin-top:18px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+html[dir=rtl] .meta{font-family:var(--font);font-size:13px}
+.tc{transition:opacity .4s;position:fixed;bottom:22px;inset-inline-start:24px;z-index:6;font-family:var(--mono);font-size:12px;color:var(--amber);display:flex;gap:14px;align-items:center;pointer-events:none}
+.tc b{color:var(--muted);font-weight:400}
+.scrub{position:fixed;bottom:0;left:0;right:0;height:3px;z-index:6;background:rgba(255,255,255,.05)}
+.scrub i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--orange),var(--amber))}
+.hint{position:fixed;bottom:22px;inset-inline-end:24px;z-index:6;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;transition:opacity .4s}
+.hint .mouse{width:18px;height:28px;border:1.5px solid var(--muted);border-radius:10px;position:relative}
+.hint .mouse::after{content:"";position:absolute;left:50%;top:6px;width:3px;height:6px;border-radius:2px;background:var(--amber);transform:translateX(-50%);animation:wheel 1.6s infinite}
+@keyframes wheel{0%{opacity:0;transform:translate(-50%,0)}40%{opacity:1}100%{opacity:0;transform:translate(-50%,9px)}}
+.feat{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.feat div{display:flex;gap:12px;align-items:flex-start;color:#C9C9D2;font-size:15px;line-height:1.5}
+.feat svg{flex:0 0 18px;margin-top:3px;color:var(--amber)}
+
+/* download */
+#download{position:relative;z-index:5;padding:120px max(20px,5vw) 60px;background:linear-gradient(180deg,transparent,rgba(6,6,7,.85) 18%,rgba(6,6,7,.96))}
+.dl-head{text-align:center;max-width:720px;margin:0 auto 46px}
+.panel{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+@media (max-width:900px){.panel{grid-template-columns:1fr}}
+.card{border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(16,16,19,.72);backdrop-filter:blur(14px);padding:26px}
+.card h3{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13.5px;margin-top:4px}
+#reel{width:100%;height:170px;display:block;margin:20px 0 6px;border-radius:12px;background:#0B0B0D;border:1px solid var(--line)}
+.reel-cap{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+html[dir=rtl] .reel-cap{font-family:var(--font);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.stat{border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;background:rgba(255,255,255,.02)}
+.stat small{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+html[dir=rtl] .stat b{text-align:right}
+.stat b{display:block;direction:ltr;unicode-bidi:isolate;font-size:clamp(17px,1.7vw,22px);white-space:nowrap;font-weight:800;font-variant-numeric:tabular-nums}
+.shot{border-radius:14px;overflow:hidden;border:1px solid var(--line);aspect-ratio:16/9;background:#0B0B0D;position:relative}
+.shot canvas{width:100%;height:100%;display:block}
+.install{width:100%;margin-top:18px;height:58px;font-size:16px}
+.install small{font-family:var(--mono);font-weight:600;font-size:11.5px;opacity:.7}
+.soon{display:flex;gap:8px;margin-top:10px}
+.soon span{flex:1;text-align:center;font-size:12.5px;color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:9px 0;line-height:1}
+.sha{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.sha code{font-family:var(--mono);font-size:11px;color:#B9B9C4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;direction:ltr;text-align:left}
+.sha small{color:var(--muted);font-size:11px;font-family:var(--mono);flex:none}
+.copy-btn{flex:none;height:28px;padding:0 10px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:transparent;color:var(--ink);font:600 12px var(--font);cursor:pointer;line-height:1}
+.copy-btn:hover{border-color:var(--amber);color:var(--amber)}
+.req{margin-top:16px;display:grid;gap:7px;font-size:13px;color:#B9B9C4}
+.req div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed rgba(255,255,255,.06);padding-bottom:7px}
+.req span:first-child{color:var(--muted)}
+.note{margin-top:14px;font-size:12.5px;color:var(--muted);line-height:1.6}
+.note b{color:var(--ink)}
+footer{position:relative;z-index:5;padding:40px 24px 50px;text-align:center;color:var(--muted);font-size:13px;background:rgba(6,6,7,.96)}
+footer img{height:30px;opacity:.85;display:block;margin:0 auto 12px}
+@media (prefers-reduced-motion:reduce){.grain,.btn.primary::after,.eyebrow i{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="world" aria-hidden="true"></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<nav>
+  <div class="brand"><img src="assets/app-icon.png" alt=""><span class="name">VIOLA STUDIO REVIEW</span></div>
+  <span class="ver" id="navVer">v1.0.0</span>
+  <div class="navlinks">
+    <a href="#ch-annotate" data-i18n="nav1">Annotate</a>
+    <a href="#ch-versions" data-i18n="nav2">Versions</a>
+    <a href="#ch-compare" data-i18n="nav3">Compare</a>
+    <a href="#ch-reports" data-i18n="nav4">Reports</a>
+  </div>
+  <button class="lang" id="langBtn" aria-label="Switch language">ع</button>
+  <a class="get" href="#download" data-i18n="get">Download</a>
+</nav>
+
+<main>
+  <section class="chapter center" id="ch-hero" data-ch="0">
+    <div class="stick"><div class="copy">
+      <span class="eyebrow"><i></i><span data-i18n="eb0">Dailies · now playing</span></span>
+      <h1><span data-i18n="h0a">Every frame,</span><br><span class="grad" data-i18n="h0b">reviewed.</span></h1>
+      <p class="lede" data-i18n="l0">A cinematic review room for animation and VFX. Mark the exact frame, track every version, and hand your team a clean report — all on your own machine.</p>
+      <div class="ctas">
+        <a class="btn primary dl-link" href="#download"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span data-i18n="cta1">Download for Windows</span></a>
+        <a class="btn ghost" href="#ch-annotate" data-i18n="cta2">Take the tour</a>
+      </div>
+      <div class="meta" id="metaLine">Windows 10 &amp; 11 (64-bit) · Release 1.0.0 · 5.5 MB</div>
+    </div></div>
+  </section>
+
+  <section class="chapter" id="ch-annotate" data-ch="1">
+    <div class="stick"><div class="copy">
+      <span class="eyebrow"><i></i><span data-i18n="eb1">Scene 01 · Annotate</span></span>
+      <h2><span data-i18n="h1a">Draw right on</span> <span class="grad" data-i18n="h1b">the frame.</span></h2>
+      <p class="lede" data-i18n="l1">Pause on any frame and sketch the note where it belongs. Every pin keeps its exact frame and timecode — at the clip's own frame rate, never a guess.</p>
+      <div class="feat">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f1a">Pen, arrows, shapes and text on the frame</span></div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f1b">Frame-accurate timecode from the real footage</span></div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="chapter right" id="ch-versions" data-ch="2">
+    <div class="stick"><div class="copy">
+      <span class="eyebrow"><i></i><span data-i18n="eb2">Scene 02 · Versions</span></span>
+      <h2><span data-i18n="h2a">v01, v02, v03 —</span> <span class="grad" data-i18n="h2b">one story.</span></h2>
+      <p class="lede" data-i18n="l2">Drop in the next render and Studio Review follows each note forward: fixed, still open, or needs another pass. Old versions stay untouched.</p>
+    </div></div>
+  </section>
+
+  <section class="chapter" id="ch-compare" data-ch="3">
+    <div class="stick"><div class="copy">
+      <span class="eyebrow"><i></i><span data-i18n="eb3">Scene 03 · Compare</span></span>
+      <h2><span data-i18n="h3a">Side by side,</span> <span class="grad" data-i18n="h3b">frame locked.</span></h2>
+      <p class="lede" data-i18n="l3">Wipe, split or overlay two versions in perfect sync and see exactly what changed between takes.</p>
+    </div></div>
+  </section>
+
+  <section class="chapter right" id="ch-reports" data-ch="4">
+    <div class="stick"><div class="copy">
+      <span class="eyebrow"><i></i><span data-i18n="eb4">Scene 04 · Deliver</span></span>
+      <h2><span data-i18n="h4a">Notes your team</span> <span class="grad" data-i18n="h4b">can act on.</span></h2>
+      <p class="lede" data-i18n="l4">Export PDF, Word, CSV or a ZIP with every annotated frame — in English or Arabic. Your videos never leave your computer.</p>
+      <div class="feat">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f4a">Autosave, crash recovery and backups built in</span></div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="f4b">Updates itself quietly — one click to restart</span></div>
+      </div>
+    </div></div>
+  </section>
+</main>
+
+<section id="download">
+  <div class="dl-head">
+    <span class="eyebrow"><i></i><span data-i18n="eb5">Final cut</span></span>
+    <h2><span data-i18n="h5a">Every release</span> <span class="grad" data-i18n="h5b">leaves a mark.</span></h2>
+    <p class="lede" style="margin:0 auto" data-i18n="l5">Each marker on the reel is a published version. The taller it stands, the more studios downloaded it.</p>
+  </div>
+  <div class="panel">
+    <div class="card">
+      <h3>VIOLA STUDIO REVIEW</h3>
+      <div class="sub"><span>MAVYR Studio</span> · <span id="relDate">2026-11-09</span></div>
+      <canvas id="reel"></canvas>
+      <div class="reel-cap"><span data-i18n="first">first release</span><span data-i18n="latest">latest</span></div>
+      <div class="stats">
+        <div class="stat"><small data-i18n="sVer">Version</small><b id="stVer">1.0.0</b></div>
+        <div class="stat"><small data-i18n="sSize">Size</small><b id="stSize">5.5 MB</b></div>
+        <div class="stat"><small data-i18n="sDl">Downloads</small><b id="stDl">0</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="shot"><canvas id="shot"></canvas></div>
+      <a class="btn primary install dl-link" id="dlBtn" href="https://github.com/abdelrhmanmahmoud9854-creator/viola-studio-review-releases/releases/latest/download/VIOLA_Studio_Review_Setup.exe">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.5v7H3zM11.5 4.4 21 3v8.5h-9.5zM3 12.5h7.5v7L3 18.5zM11.5 12.5H21V21l-9.5-1.4z"/></svg>
+        <span data-i18n="install">Install for Windows</span> <small id="dlVer">v1.0.0 · x64</small>
+      </a>
+      <div class="soon"><span data-i18n="mac">macOS · soon</span><span data-i18n="linux">Linux · soon</span></div>
+      <div class="sha"><small>SHA-256</small><code id="sha">6E019EB144D672C1DF67F230FD32A96124954C4C8F23BF71C011E0D8E07F9511</code><button class="copy-btn" id="copySha" data-i18n="copy">Copy</button></div>
+      <div class="req">
+        <div><span data-i18n="r1">System</span><span data-i18n="r1v">Windows 10 / 11, 64-bit</span></div>
+        <div><span data-i18n="r2">Memory</span><span data-i18n="r2v">8 GB RAM recommended</span></div>
+        <div><span data-i18n="r3">Install</span><span data-i18n="r3v">Your user only · no admin</span></div>
+        <div><span data-i18n="r4">Privacy</span><span data-i18n="r4v">Offline · no account · no uploads</span></div>
+      </div>
+      <p class="note" data-i18n-html="smart">Windows may show <b>“Windows protected your PC”</b> because the installer isn't code-signed yet. Click <b>More info → Run anyway</b>, and compare the SHA-256 above if you want to be sure the file is ours.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <img src="assets/mavyr-logo.png" alt="MAVYR Studio">
+  <div>© 2026 MAVYR Studio · <span data-i18n="foot">Made for people who care about every frame.</span></div>
+</footer>
+
+<div class="tc" id="tc"><span id="tcVal">00:00:00:00</span><b id="tcScene">SC 00</b></div>
+<div class="hint" id="hint"><span class="mouse"></span><span data-i18n="scroll">Scroll to roll film</span></div>
+<div class="scrub"><i id="scrub"></i></div>
+
+<script>
+/* ───────── i18n ───────── */
+const T = { ar: {
+  nav1:'التعليق', nav2:'النسخ', nav3:'المقارنة', nav4:'التقارير', get:'نزّل البرنامج',
+  eb0:'جلسة المراجعة · شغّالة دلوقتي', h0a:'كل فريم', h0b:'متراجع.',
+  l0:'غرفة مراجعة سينمائية للأنيميشن والـ VFX. علّم على الفريم بالظبط، تابع كل نسخة، وسلّم فريقك تقرير نضيف — وكل ده على جهازك.',
+  cta1:'نزّل لويندوز', cta2:'خد جولة',
+  eb1:'مشهد 01 · التعليق', h1a:'ارسم على', h1b:'الفريم نفسه.',
+  l1:'وقّف على أي فريم واكتب الملاحظة في مكانها. كل علامة بتحفظ الفريم والتايم كود بالظبط — على فريم ريت الفيديو الحقيقي، مش تخمين.',
+  f1a:'قلم وأسهم وأشكال وكتابة على الفريم', f1b:'تايم كود دقيق من الفيديو نفسه',
+  eb2:'مشهد 02 · النسخ', h2a:'v01 و v02 و v03 —', h2b:'قصة واحدة.',
+  l2:'ضيف الرندر الجديد والبرنامج بيتابع كل ملاحظة: اتصلحت، لسه مفتوحة، ولا محتاجة لفّة كمان. النسخ القديمة بتفضل زي ما هي.',
+  eb3:'مشهد 03 · المقارنة', h3a:'جنب بعض،', h3b:'فريم بفريم.',
+  l3:'قارن نسختين بالمسح أو التقسيم أو فوق بعض، متزامنين بالظبط، وشوف إيه اللي اتغيّر بين اللقطتين.',
+  eb4:'مشهد 04 · التسليم', h4a:'ملاحظات فريقك', h4b:'يقدر ينفّذها.',
+  l4:'طلّع PDF أو Word أو CSV أو ZIP فيه كل فريم متعلّم عليه — بالعربي أو الإنجليزي. الفيديوهات عمرها ما بتخرج من جهازك.',
+  f4a:'حفظ تلقائي واسترجاع بعد الكراش ونسخ احتياطية', f4b:'بيتحدّث لوحده — دوسة واحدة لإعادة التشغيل',
+  eb5:'النسخة النهائية', h5a:'كل إصدار', h5b:'بيسيب علامة.',
+  l5:'كل علامة على الشريط ده إصدار اتنشر. كل ما تبقى أطول، يبقى استوديوهات أكتر نزّلته.',
+  first:'أول إصدار', latest:'الأحدث', sVer:'الإصدار', sSize:'الحجم', sDl:'التحميلات',
+  install:'سطّب على ويندوز', mac:'ماك · قريب', linux:'لينكس · قريب', copy:'انسخ',
+  r1:'النظام', r1v:'ويندوز 10 / 11، 64-بت', r2:'الذاكرة', r2v:'8 جيجا رام أو أكتر', r3:'التسطيب', r3v:'لحسابك بس · من غير أدمن', r4:'الخصوصية', r4v:'أوفلاين · من غير حساب · من غير رفع',
+  smart:'ويندوز ممكن يقولك <b><bdi dir="ltr">“Windows protected your PC”</bdi></b> لأن المثبّت لسه مش موقّع. دوس <b><bdi dir="ltr">More info → Run anyway</bdi></b>، وقارن كود SHA-256 اللي فوق لو عايز تتأكد إن الملف بتاعنا.',
+  foot:'معمول للناس اللي بيفرق معاها كل فريم.', scroll:'اعمل سكرول عشان الفيلم يمشي', copied:'اتنسخ'
+}};
+const EN = {}; document.querySelectorAll('[data-i18n]').forEach(e => EN[e.dataset.i18n] = e.textContent);
+document.querySelectorAll('[data-i18n-html]').forEach(e => EN[e.dataset.i18nHtml] = e.innerHTML);
+EN.copied = 'Copied';
+let lang = 'en';
+let savedLang = null;
+try { savedLang = localStorage.getItem('vsr-lang'); } catch (e) {}
+lang = savedLang || ((navigator.language || '').startsWith('ar') ? 'ar' : 'en');
+function tr(k){ return lang === 'ar' ? (T.ar[k] ?? EN[k]) : EN[k]; }
+let metaInfo = { ver:'1.0.0', size:'5.5' };
+function renderMeta(){
+  document.getElementById('metaLine').textContent = lang === 'ar'
+    ? `ويندوز 10 و 11 (64-بت) · الإصدار ${metaInfo.ver} · ${metaInfo.size} ميجا`
+    : `Windows 10 & 11 (64-bit) · Release ${metaInfo.ver} · ${metaInfo.size} MB`;
+}
+function applyLang(){
+  document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(e => e.textContent = tr(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-html]').forEach(e => e.innerHTML = tr(e.dataset.i18nHtml));
+  document.getElementById('langBtn').textContent = lang === 'ar' ? 'EN' : 'ع';
+  renderMeta();
+  try { localStorage.setItem('vsr-lang', lang); } catch (e) {}
+  window.dispatchEvent(new Event('langchange'));
+}
+document.getElementById('langBtn').onclick = () => { lang = lang === 'ar' ? 'en' : 'ar'; applyLang(); };
+applyLang();
+
+/* copy reveal */
+const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('in', e.isIntersecting)), { threshold: .35 });
+document.querySelectorAll('.copy').forEach(c => io.observe(c));
+
+document.getElementById('copySha').onclick = async (ev) => {
+  try { await navigator.clipboard.writeText(document.getElementById('sha').textContent.trim()); } catch (e) {}
+  ev.target.textContent = tr('copied'); setTimeout(() => ev.target.textContent = tr('copy'), 1400);
+};
+
+/* ───────── live release data ───────── */
+const REPO = 'abdelrhmanmahmoud9854-creator/viola-studio-review-releases';
+const ASSET = 'VIOLA_Studio_Review_Setup.exe';
+let releases = [{ tag:'v1.0.0', date:'2026-11-09', downloads:0 }];
+function countUp(el, to){ const from = 0, t0 = performance.now(); (function f(t){ const k = Math.min(1,(t-t0)/1200); el.textContent = Math.round(from + (to-from)*(1-Math.pow(1-k,3))).toLocaleString(); if (k<1) requestAnimationFrame(f); })(t0); }
+fetch(`https://api.github.com/repos/${REPO}/releases`).then(r => r.ok ? r.json() : null).then(list => {
+  if (!Array.isArray(list) || !list.length) return;
+  list = list.filter(r => !r.draft).sort((a,b) => new Date(a.published_at) - new Date(b.published_at));
+  releases = list.map(r => ({ tag:r.tag_name, date:(r.published_at||'').slice(0,10), downloads:(r.assets||[]).reduce((s,a)=>s+(a.download_count||0),0) }));
+  const last = list[list.length-1];
+  const asset = (last.assets||[]).find(a => a.name === ASSET);
+  const ver = last.tag_name.replace(/^v/,'');
+  document.getElementById('stVer').textContent = ver;
+  document.getElementById('navVer').textContent = 'v' + ver;
+  document.getElementById('dlVer').textContent = `v${ver} · x64`;
+  document.getElementById('relDate').textContent = (last.published_at||'').slice(0,10);
+  metaInfo.ver = ver;
+  if (asset){
+    const mb = (asset.size/1048576).toFixed(1);
+    metaInfo.size = mb;
+    document.getElementById('stSize').textContent = mb + ' MB';
+    if (asset.digest) document.getElementById('sha').textContent = asset.digest.replace(/^sha256:/,'').toUpperCase();
+  }
+  renderMeta();
+  countUp(document.getElementById('stDl'), releases.reduce((s,r)=>s+r.downloads,0));
+}).catch(() => {});
+
+/* ───────── release reel (markers per release) ───────── */
+(function(){
+  const c = document.getElementById('reel'), g = c.getContext('2d');
+  let w, h, t0 = performance.now();
+  function size(){ const r = c.getBoundingClientRect(), d = devicePixelRatio||1; c.width = r.width*d; c.height = r.height*d; w = c.width; h = c.height; g.setTransform(1,0,0,1,0,0); }
+  addEventListener('resize', size); size();
+  function draw(t){
+    const d = devicePixelRatio||1, s = (t - t0)/1000;
+    g.clearRect(0,0,w,h);
+    const pad = 22*d, base = h - 34*d;
+    // ruler
+    g.strokeStyle = 'rgba(255,255,255,.08)'; g.lineWidth = d;
+    for (let i=0;i<=60;i++){ const x = pad + (w-2*pad)*i/60, hh = (i%10?5:11)*d; g.beginPath(); g.moveTo(x,base); g.lineTo(x,base+hh); g.stroke(); }
+    // perforations
+    g.fillStyle = 'rgba(255,255,255,.05)';
+    for (let x = (s*30*d)%(26*d); x < w; x += 26*d){ g.fillRect(x, 6*d, 12*d, 7*d); g.fillRect(x, h-12*d, 12*d, 7*d); }
+    const n = releases.length, maxD = Math.max(1, ...releases.map(r=>r.downloads));
+    const sweep = ((s*0.25)%1.25);
+    releases.forEach((r,i) => {
+      const x = n === 1 ? w/2 : pad + (w-2*pad)*(i/(n-1));
+      const hgt = (28 + 70*Math.log1p(r.downloads)/Math.log1p(maxD))*d;
+      const grow = Math.min(1, Math.max(0, (s - i*0.15)/0.8)), e = 1-Math.pow(1-grow,3);
+      const top = base - hgt*e;
+      const lit = Math.max(0, 1 - Math.abs(sweep - (x/w))*6);
+      g.strokeStyle = `rgba(255,167,38,${.55+.45*lit})`; g.lineWidth = 2*d;
+      g.beginPath(); g.moveTo(x,base); g.lineTo(x,top); g.stroke();
+      g.fillStyle = '#FFA726'; g.beginPath(); g.arc(x, top, (7+3*lit)*d*e, 0, 7); g.fill();
+      g.fillStyle = '#1a0a02'; g.font = `700 ${9*d}px "Plus Jakarta Sans"`; g.textAlign='center'; g.textBaseline='middle';
+      if (e > .8) g.fillText(String(i+1), x, top+.5*d);
+      g.fillStyle = '#8D8D99'; g.font = `600 ${10*d}px "JetBrains Mono"`; g.textBaseline='alphabetic';
+      g.fillText(r.tag, x, base + 24*d);
+    });
+    // playhead sweep
+    const px = pad + (w-2*pad)*Math.min(1,sweep);
+    g.fillStyle = 'rgba(255,224,130,.85)'; g.fillRect(px-d, 16*d, 2*d, base-16*d);
+    const gr = g.createLinearGradient(px-60*d,0,px,0); gr.addColorStop(0,'rgba(234,88,12,0)'); gr.addColorStop(1,'rgba(234,88,12,.18)');
+    g.fillStyle = gr; g.fillRect(px-60*d, 16*d, 60*d, base-16*d);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+</script>
+
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }</script>
+<script type="module">
+import * as THREE from 'three';
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const mobile = innerWidth < 760;
+const canvas = document.getElementById('world');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x060607);
+scene.fog = new THREE.FogExp2(0x060607, 0.045);
+const camera = new THREE.PerspectiveCamera(48, innerWidth/innerHeight, 0.1, 200);
+
+/* ───── procedural "footage": animated canvases that look like animation/VFX shots ───── */
+const W = 512, H = 288;
+function makeClip(kind, seed){
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d');
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const rnd = (i) => { const x = Math.sin(seed*91.7 + i*12.9898)*43758.5453; return x - Math.floor(x); };
+  const stars = Array.from({length:70}, (_,i)=>[rnd(i)*W, rnd(i+99)*H*0.7, rnd(i+7)]);
+  const hue = [22, 280, 200, 340, 160, 35][kind % 6];
+  function draw(t){
+    const s = t + seed*3;
+    if (kind % 6 === 0){ // sunset hills + bouncing ball
+      const sky = g.createLinearGradient(0,0,0,H); sky.addColorStop(0,'#1b0d2e'); sky.addColorStop(.55,'#e2582a'); sky.addColorStop(1,'#ffcf7a');
+      g.fillStyle = sky; g.fillRect(0,0,W,H);
+      g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(W*.7, H*.58, 46, 0, 7); g.fill();
+      for (let l=0;l<3;l++){ g.fillStyle = ['#3a1a2a','#26111d','#140810'][l]; g.beginPath(); g.moveTo(0,H);
+        for (let x=0;x<=W;x+=16) g.lineTo(x, H*(.62+.1*l) + Math.sin(x*.012 + l*2 + s*.15*(l+1))*18); g.lineTo(W,H); g.fill(); }
+      const bx = (s*90)%(W+80)-40, by = H*.78 - Math.abs(Math.sin(s*3))*90, sq = 1 - .25*Math.max(0, 1-Math.abs(Math.sin(s*3))*6);
+      g.fillStyle = '#ff7a2a'; g.beginPath(); g.ellipse(bx, by, 16/sq*.9, 16*sq, 0, 0, 7); g.fill();
+    } else if (kind % 6 === 1){ // nebula + stars + comet (VFX)
+      g.fillStyle = '#05040d'; g.fillRect(0,0,W,H);
+      for (let i=0;i<3;i++){ const r = g.createRadialGradient(W*(.3+.25*i)+Math.sin(s*.3+i)*30, H*.5, 0, W*(.3+.25*i), H*.5, 170);
+        r.addColorStop(0, `hsla(${hue+i*30},80%,60%,.55)`); r.addColorStop(1,'transparent'); g.fillStyle = r; g.fillRect(0,0,W,H); }
+      stars.forEach(([x,y,b])=>{ g.fillStyle = `rgba(255,255,255,${.3+.7*Math.abs(Math.sin(s*2+b*9))})`; g.fillRect(x, y*1.3, 2, 2); });
+      const cx = (s*140)%(W+200)-100, cy = H*.3 + cx*.15; const tail = g.createLinearGradient(cx-140, cy-21, cx, cy);
+      tail.addColorStop(0,'transparent'); tail.addColorStop(1,'#ffe8b0'); g.strokeStyle = tail; g.lineWidth = 4; g.beginPath(); g.moveTo(cx-140, cy-21); g.lineTo(cx, cy); g.stroke();
+    } else if (kind % 6 === 2){ // character walk cycle silhouette on teal
+      const sky = g.createLinearGradient(0,0,0,H); sky.addColorStop(0,'#0b2a3a'); sky.addColorStop(1,'#4fb3a9'); g.fillStyle = sky; g.fillRect(0,0,W,H);
+      g.fillStyle = 'rgba(255,255,255,.08)'; for (let i=0;i<6;i++){ const x = ((i*120 - s*40)%(W+120)+W+120)%(W+120)-60; g.beginPath(); g.ellipse(x, 60+i%3*25, 50, 14, 0, 0, 7); g.fill(); }
+      g.fillStyle = '#082029'; g.fillRect(0, H*.8, W, H*.2);
+      const x = W*.5 + Math.sin(s*.5)*60, step = Math.sin(s*6);
+      g.strokeStyle = '#082029'; g.lineCap = 'round'; g.lineWidth = 12;
+      g.beginPath(); g.moveTo(x, H*.52); g.lineTo(x + step*22, H*.8); g.moveTo(x, H*.52); g.lineTo(x - step*22, H*.8); g.stroke();
+      g.lineWidth = 16; g.beginPath(); g.moveTo(x, H*.52); g.lineTo(x, H*.32); g.stroke();
+      g.lineWidth = 9; g.beginPath(); g.moveTo(x, H*.36); g.lineTo(x - step*20, H*.5); g.moveTo(x, H*.36); g.lineTo(x + step*20, H*.5); g.stroke();
+      g.fillStyle = '#082029'; g.beginPath(); g.arc(x, H*.24, 15, 0, 7); g.fill();
+    } else if (kind % 6 === 3){ // ink lines / motion graphics
+      g.fillStyle = '#120a14'; g.fillRect(0,0,W,H);
+      for (let i=0;i<14;i++){ g.strokeStyle = `hsla(${hue + i*8},80%,${50+i*2}%,.8)`; g.lineWidth = 2.5; g.beginPath();
+        for (let x=0;x<=W;x+=8) g.lineTo(x, H/2 + Math.sin(x*.02 + s*1.4 + i*.45)*(20+i*6)*Math.sin(s*.4+i)); g.stroke(); }
+    } else if (kind % 6 === 4){ // rotating 3D-ish cube render
+      g.fillStyle = '#0d1714'; g.fillRect(0,0,W,H);
+      g.strokeStyle = 'rgba(80,220,170,.18)'; g.lineWidth = 1; for (let x=0;x<W;x+=32){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,H); g.stroke(); } for (let y=0;y<H;y+=32){ g.beginPath(); g.moveTo(0,y); g.lineTo(W,y); g.stroke(); }
+      const a = s*.8, pts = [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]].map(([x,y,z])=>{
+        const x1 = x*Math.cos(a)-z*Math.sin(a), z1 = x*Math.sin(a)+z*Math.cos(a), y1 = y*Math.cos(a*.6)-z1*Math.sin(a*.6), z2 = y*Math.sin(a*.6)+z1*Math.cos(a*.6);
+        const k = 260/(z2+5); return [W/2 + x1*k*.55, H/2 + y1*k*.55]; });
+      g.strokeStyle = '#7CFFD4'; g.lineWidth = 2.2; [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(([i,j])=>{ g.beginPath(); g.moveTo(...pts[i]); g.lineTo(...pts[j]); g.stroke(); });
+    } else { // explosion / particles burst (VFX)
+      g.fillStyle = '#100604'; g.fillRect(0,0,W,H);
+      const k = (s*.6)%1, r = g.createRadialGradient(W/2,H/2,0,W/2,H/2,40+k*220); r.addColorStop(0,`rgba(255,240,200,${1-k})`); r.addColorStop(.3,`rgba(255,140,40,${.9-k*.8})`); r.addColorStop(1,'transparent');
+      g.fillStyle = r; g.fillRect(0,0,W,H);
+      for (let i=0;i<60;i++){ const ang = rnd(i)*7, d = k*(120+rnd(i+3)*160); g.fillStyle = `rgba(255,${150+rnd(i+5)*100|0},60,${1-k})`; g.fillRect(W/2+Math.cos(ang)*d, H/2+Math.sin(ang)*d*.7, 3, 3); }
+    }
+    // burned-in slate: timecode + clip id
+    const f = Math.floor(s*24);
+    g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(0,H-26,W,26);
+    g.fillStyle = '#ffa726'; g.font = '600 13px "JetBrains Mono",monospace'; g.textBaseline = 'middle';
+    g.fillText(`SH_${String(10+seed*10).padStart(3,'0')}  v0${1+seed%3}`, 12, H-13);
+    g.textAlign = 'right'; g.fillText(`${String(Math.floor(f/86400)%24).padStart(2,'0')}:${String(Math.floor(f/1440)%60).padStart(2,'0')}:${String(Math.floor(f/24)%60).padStart(2,'0')}:${String(f%24).padStart(2,'0')}`, W-12, H-13);
+    g.textAlign = 'left';
+    tex.needsUpdate = true;
+  }
+  draw(0);
+  return { tex, draw, canvas: cv, g };
+}
+
+/* ───── frames in space ───── */
+const frameGroup = new THREE.Group(); scene.add(frameGroup);
+const clips = [];
+function makeFrame(kind, seed, w = 3.2){
+  const clip = makeClip(kind, seed);
+  const h = w*9/16;
+  const grp = new THREE.Group();
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: clip.tex, toneMapped: false }));
+  grp.add(screen);
+  // bezel
+  const bez = new THREE.Mesh(new THREE.PlaneGeometry(w+0.08, h+0.08), new THREE.MeshBasicMaterial({ color: 0x1b1b20 }));
+  bez.position.z = -0.01; grp.add(bez);
+  // glow card behind
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(w*1.5, h*1.6), new THREE.MeshBasicMaterial({ map: glowTex, color: 0xea580c, transparent: true, opacity: .22, depthWrite: false, blending: THREE.AdditiveBlending }));
+  glow.position.z = -0.05; grp.add(glow);
+  clips.push(clip);
+  grp.userData = { clip, screen, glow, w, h };
+  return grp;
+}
+const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  const r = g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0,0,128,128);
+  const t = new THREE.CanvasTexture(c); return t; })();
+
+// A long corridor of floating clips along a gentle spiral path.
+const PATH_LEN = 120;
+const ambient = [];
+const count = mobile ? 26 : 46;
+for (let i=0;i<count;i++){
+  const f = makeFrame(i, i, 2.2 + (i%3)*0.5);
+  const z = -i*(PATH_LEN/count) - 4;
+  const side = i % 2 ? 1 : -1;
+  const r = 4.2 + (i%4)*1.1;
+  f.position.set(side*r + Math.sin(i)*1.2, Math.sin(i*1.7)*2.4, z);
+  f.rotation.y = -side*0.55;
+  f.userData.base = f.position.clone(); f.userData.phase = i*0.7;
+  frameGroup.add(f); ambient.push(f);
+}
+
+/* hero chapters: special frames the camera flies to */
+const hero = makeFrame(0, 7, 6.4); hero.position.set(0, 0, -6); scene.add(hero);
+hero.userData.screen.material.color.setScalar(.55); // dimmer so the headline reads
+
+// 1) Annotate: a big frame with a stroke drawn by scroll progress
+const annot = makeFrame(2, 3, 6); annot.position.set(1.9, 0.2, -36); annot.rotation.y = -0.32; scene.add(annot);
+const annotOverlay = (() => { const c = document.createElement('canvas'); c.width = 1024; c.height = 576; const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(6, 6*9/16), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); m.position.z = 0.01; annot.add(m); return { c, g: c.getContext('2d'), t }; })();
+function drawAnnot(p){
+  const { g, c, t } = annotOverlay; g.clearRect(0,0,c.width,c.height);
+  const pts = [[300,170],[360,140],[450,150],[520,210],[540,300],[500,380],[420,410],[340,390],[300,330],[290,250],[300,170]];
+  const k = Math.min(1, p*1.4) * (pts.length-1);
+  g.lineCap = g.lineJoin = 'round';
+  for (const [wid, col] of [[26,'rgba(234,88,12,.28)'],[9,'#EA580C'],[2.5,'rgba(255,220,160,.9)']]){
+    g.strokeStyle = col; g.lineWidth = wid; g.beginPath(); g.moveTo(...pts[0]);
+    for (let i=1;i<=Math.floor(k);i++) g.lineTo(...pts[i]);
+    const fi = Math.floor(k), fr = k - fi; if (fi < pts.length-1) g.lineTo(pts[fi][0]+(pts[fi+1][0]-pts[fi][0])*fr, pts[fi][1]+(pts[fi+1][1]-pts[fi][1])*fr);
+    g.stroke();
+  }
+  // arrow + pins
+  const a = Math.max(0, Math.min(1, (p-.55)*3));
+  if (a>0){ g.strokeStyle = '#FFA726'; g.lineWidth = 7; g.beginPath(); g.moveTo(760, 120); g.lineTo(760-(760-575)*a, 120+(215-120)*a); g.stroke();
+    if (a>.95){ g.beginPath(); g.moveTo(575,215); g.lineTo(600,190); g.moveTo(575,215); g.lineTo(606,222); g.stroke(); } }
+  [[540,150,1,.45],[780,110,2,.7]].forEach(([x,y,n,at]) => { const q = Math.max(0, Math.min(1,(p-at)*5)); if (!q) return; const s = 1 + .3*Math.sin(Math.min(1,q)*Math.PI);
+    g.fillStyle = '#FFA726'; g.beginPath(); g.arc(x,y,22*q*s,0,7); g.fill(); g.fillStyle = '#1a0a02'; g.font = '800 22px "Plus Jakarta Sans"'; g.textAlign='center'; g.textBaseline='middle'; if (q>.6) g.fillText('#'+n, x, y+1);
+    if (q>.9){ g.fillStyle = 'rgba(32,20,12,.92)'; g.strokeStyle = '#7a3a10'; g.lineWidth = 2; const label = n===1?'Hold 4 frames longer':'Rim light too hot'; g.font = '600 20px "Plus Jakarta Sans"'; const tw = g.measureText(label).width + 28;
+      g.beginPath(); g.roundRect(x+30, y-20, tw, 40, 10); g.fill(); g.stroke(); g.fillStyle = '#FFE082'; g.textAlign = 'left'; g.fillText(label, x+44, y+1); } });
+  t.needsUpdate = true;
+}
+
+// 2) Versions: three takes that fan out in depth
+const versions = [0,1,2].map(i => { const f = makeFrame(0, 20+i, 4.4); f.position.set(-1.2, 0, -62); scene.add(f); return f; });
+const verLabels = versions.map((f,i) => { const c = document.createElement('canvas'); c.width = 256; c.height = 96; const g = c.getContext('2d');
+  g.fillStyle = i===2 ? '#EA580C' : 'rgba(20,20,24,.9)'; g.beginPath(); g.roundRect(8,18,240,60,30); g.fill(); g.strokeStyle = '#EA580C'; g.lineWidth = 3; g.stroke();
+  g.fillStyle = i===2 ? '#1a0a02' : '#FFA726'; g.font = '800 34px "Plus Jakarta Sans"'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(`v0${i+1}`, 128, 50);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1.1, .41), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); m.position.set(-1.6, 1.62, .03); f.add(m); return m; });
+
+// 3) Compare: two takes slide together with a wipe line
+const cmpA = makeFrame(1, 30, 5), cmpB = makeFrame(1, 31, 5);
+cmpA.position.set(-4, 0, -90); cmpB.position.set(4, 0, -90); scene.add(cmpA, cmpB);
+const wipe = new THREE.Mesh(new THREE.PlaneGeometry(.04, 2.9), new THREE.MeshBasicMaterial({ color: 0xFFE082, toneMapped: false })); wipe.position.set(0,0,-89.9); scene.add(wipe);
+
+// 4) Reports: pages that fly out of a frame in an arc
+const reportFrame = makeFrame(4, 40, 5.2); reportFrame.position.set(-1.6, 0, -116); reportFrame.rotation.y = .3; scene.add(reportFrame);
+const pageTex = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 340; const g = c.getContext('2d');
+  g.fillStyle = '#f4f1ea'; g.fillRect(0,0,256,340); g.fillStyle = '#EA580C'; g.fillRect(18,18,90,10); g.fillStyle = '#c9c4b8';
+  for (let i=0;i<6;i++) g.fillRect(18, 44+i*14, 180-(i%3)*40, 6);
+  g.fillStyle = '#222'; g.fillRect(18, 140, 220, 110); g.fillStyle = '#EA580C'; g.beginPath(); g.arc(150,180,10,0,7); g.fill();
+  g.fillStyle = '#c9c4b8'; for (let i=0;i<4;i++) g.fillRect(18, 268+i*14, 200-(i%2)*60, 6);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+const pages = Array.from({length:7}, (_,i) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.46), new THREE.MeshBasicMaterial({ map: pageTex, transparent: true, toneMapped: false, side: THREE.DoubleSide }));
+  m.userData.i = i; scene.add(m); return m; });
+
+/* film strip ribbons that curl through the world */
+function filmStrip(z0, len, y, phase){
+  const segs = 220, geo = new THREE.PlaneGeometry(len, 1, segs, 1);
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 64; const g = c.getContext('2d');
+  g.fillStyle = '#121214'; g.fillRect(0,0,1024,64);
+  for (let x=6;x<1024;x+=32){ g.fillStyle = '#2a2a2f'; g.fillRect(x, 6, 16, 9); g.fillRect(x, 49, 16, 9); }
+  for (let x=0;x<1024;x+=128){ g.fillStyle = 'rgba(234,88,12,.35)'; g.fillRect(x+6, 20, 116, 24); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping; t.repeat.set(len/4, 1); t.colorSpace = THREE.SRGBColorSpace;
+  const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide, toneMapped: false, transparent: true, opacity: .9 }));
+  const pos = geo.attributes.position;
+  for (let i=0;i<pos.count;i++){ const x = pos.getX(i), yy = pos.getY(i), k = x/len;
+    pos.setXYZ(i, Math.sin(k*9 + phase)*6, y + yy*.6 + Math.cos(k*7+phase)*1.6, z0 - (k+.5)*len); }
+  geo.computeVertexNormals();
+  scene.add(m); return { m, t };
+}
+const strips = [filmStrip(-2, 140, -3.4, 0), filmStrip(-2, 140, 3.6, 2.2)];
+
+/* projector dust */
+const dustN = mobile ? 900 : 2200;
+const dustGeo = new THREE.BufferGeometry(); const dp = new Float32Array(dustN*3);
+for (let i=0;i<dustN;i++){ dp[i*3] = (Math.random()-.5)*26; dp[i*3+1] = (Math.random()-.5)*14; dp[i*3+2] = -Math.random()*140; }
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dp,3));
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ size: .05, color: 0xffc78a, transparent: true, opacity: .65, depthWrite: false, blending: THREE.AdditiveBlending, map: glowTex }));
+scene.add(dust);
+
+/* light beam from behind the camera like a projector */
+const beam = new THREE.Mesh(new THREE.ConeGeometry(9, 40, 48, 1, true), new THREE.MeshBasicMaterial({ color: 0xff9a3c, transparent: true, opacity: .035, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+beam.rotation.x = Math.PI/2; scene.add(beam);
+
+/* ───── camera path driven by scroll ───── */
+const keys = [ // [scroll 0..1, camera pos, look target] — subjects sit opposite the text column
+  [0.00, [0, 0, 6.5],    [0, 0, -6]],
+  [0.14, [0.6, .4, -16],  [1.2, .2, -36]],
+  [0.30, [-1.6, .2, -27.5], [0.2, .2, -36]],
+  [0.44, [-2.5, 1.0, -47],[0.6, 0, -62]],
+  [0.58, [-3.4, .6, -49], [0.8, 0, -62]],
+  [0.70, [0, .2, -76],    [-1.5, 0, -90]],
+  [0.80, [-0.4, 0, -78],  [-3.6, 0, -90]],
+  [0.90, [0.6, .3, -106],[1.8, 0, -116]],
+  [1.00, [0, 6, -96],     [0, 0, -125]],
+];
+const v3 = (a) => new THREE.Vector3(...a);
+function sampleKeys(p){
+  let i = 0; while (i < keys.length-2 && p > keys[i+1][0]) i++;
+  const [p0,a0,t0] = keys[i], [p1,a1,t1] = keys[i+1];
+  let k = (p - p0)/(p1 - p0); k = Math.max(0, Math.min(1, k)); k = k*k*(3-2*k);
+  return { pos: v3(a0).lerp(v3(a1), k), look: v3(t0).lerp(v3(t1), k) };
+}
+function chapterProgress(id){
+  const el = document.getElementById(id); const r = el.getBoundingClientRect();
+  return Math.max(0, Math.min(1, -r.top / Math.max(1, r.height - innerHeight)));
+}
+
+let scrollP = 0, smoothP = 0, mouse = { x:0, y:0 }, sm = { x:0, y:0 };
+const mainEl = document.querySelector('main');
+function readScroll(){
+  const end = mainEl.offsetTop + mainEl.offsetHeight - innerHeight;
+  scrollP = Math.max(0, Math.min(1, scrollY / Math.max(1, end)));
+  const total = document.documentElement.scrollHeight - innerHeight;
+  document.getElementById('scrub').style.width = (scrollY/Math.max(1,total)*100) + '%';
+  document.getElementById('hint').style.opacity = scrollY > 80 ? 0 : 1;
+  document.getElementById('tc').style.opacity = scrollY > end + innerHeight*.3 ? 0 : 1;
+}
+addEventListener('scroll', readScroll, { passive: true }); readScroll();
+addEventListener('pointermove', e => { mouse.x = e.clientX/innerWidth*2-1; mouse.y = e.clientY/innerHeight*2-1; });
+addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+const tcVal = document.getElementById('tcVal'), tcScene = document.getElementById('tcScene');
+const clock = new THREE.Clock();
+let clipCursor = 0;
+function frame(){
+  const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+  smoothP += (scrollP - smoothP) * (reduce ? 1 : Math.min(1, dt*4.5));
+  sm.x += (mouse.x - sm.x) * Math.min(1, dt*3); sm.y += (mouse.y - sm.y) * Math.min(1, dt*3);
+
+  const { pos, look } = sampleKeys(smoothP);
+  camera.position.copy(pos).add(new THREE.Vector3(sm.x*.5, -sm.y*.3, 0));
+  camera.lookAt(look.x + sm.x*.6, look.y - sm.y*.35, look.z);
+  beam.position.set(camera.position.x, camera.position.y + .6, camera.position.z + 14);
+
+  // ambient frames float and turn slightly toward the camera
+  ambient.forEach(f => { const b = f.userData.base, ph = f.userData.phase;
+    f.position.y = b.y + Math.sin(t*.6 + ph)*.18; f.position.x = b.x + Math.cos(t*.4 + ph)*.12;
+    const dz = Math.abs(f.position.z - camera.position.z); f.userData.glow.material.opacity = .08 + .25*Math.max(0, 1 - dz/18); });
+
+  // hero intro: frame drifts back a little as the page starts
+  hero.position.z = -6 - smoothP*30; hero.rotation.y = sm.x*.12; hero.rotation.x = sm.y*.06;
+
+  // chapter animations
+  drawAnnot(chapterProgress('ch-annotate'));
+  const pv = chapterProgress('ch-versions'), ev = 1 - Math.pow(1 - pv, 3);
+  versions.forEach((f,i) => { f.position.set(-1.2 - i*ev*2.3, i*ev*.3 - .2*ev, -62 + i*ev*2.2); f.rotation.y = .45*ev + i*.06*ev; });
+  const pc = chapterProgress('ch-compare'), ec = Math.min(1, pc*1.6), ec2 = 1 - Math.pow(1-ec,3);
+  cmpA.position.x = -4 + ec2*1.25; cmpB.position.x = 4 - ec2*1.25;
+  const wx = Math.sin(t*1.2)*1.2*ec2; wipe.position.x = wx; wipe.material.opacity = ec2; wipe.visible = ec2 > .02;
+  cmpA.userData.screen.material.opacity = 1;
+  const pr = chapterProgress('ch-reports');
+  pages.forEach(m => { const i = m.userData.i, k = Math.max(0, Math.min(1, pr*1.5 - i*.08)), e = 1 - Math.pow(1-k,3);
+    const ang = -0.9 + i*0.32;
+    m.position.set(-1.6 + Math.cos(ang)*2.6*e - .6*e, Math.sin(ang)*1.5*e + .2, -116 + .2 + e*(3.2 + i*.35));
+    m.rotation.set(0, (1-e)*-.4 + e*(.25 - i*.05), (1-e)*.3 + e*(ang*.25)); m.scale.setScalar(.3 + .9*e); m.visible = e > .01; });
+
+  // film strips scroll; dust drifts
+  strips.forEach((s,i) => s.t.offset.x = (t*.04*(i?1:-1)));
+  const pa = dust.geometry.attributes.position.array;
+  for (let i=0;i<dustN;i++){ pa[i*3+1] += Math.sin(t*.3 + i)*.0015; }
+  dust.geometry.attributes.position.needsUpdate = true;
+
+  // update a few clip textures per frame (round-robin) to keep it smooth
+  const visible = [hero, annot, ...versions, cmpA, cmpB, reportFrame];
+  visible.forEach(f => f.userData.clip.draw(t));
+  const per = mobile ? 3 : 6;
+  for (let k=0;k<per;k++){ const c = clips[clipCursor++ % clips.length]; c.draw(t); }
+
+  // timecode readout follows scroll like a scrub
+  const fr = Math.floor(smoothP * 24 * 90);
+  tcVal.textContent = `00:${String(Math.floor(fr/1440)%60).padStart(2,'0')}:${String(Math.floor(fr/24)%60).padStart(2,'0')}:${String(fr%24).padStart(2,'0')}`;
+  const sc = smoothP < .1 ? 0 : smoothP < .36 ? 1 : smoothP < .62 ? 2 : smoothP < .84 ? 3 : 4;
+  tcScene.textContent = 'SC 0' + sc;
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* small animated preview in the download card: the hero clip */
+(function(){
+  const c = document.getElementById('shot'), g = c.getContext('2d');
+  function size(){ const r = c.getBoundingClientRect(), d = devicePixelRatio||1; c.width = r.width*d; c.height = r.height*d; }
+  addEventListener('resize', size); size();
+  const src = hero.userData.clip.canvas;
+  (function loop(){ g.drawImage(src, 0, 0, c.width, c.height); requestAnimationFrame(loop); })();
+})();
+</script>
+</body>
+</html>
