@@ -3,41 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VIOLA STUDIO REVIEW — frame-accurate review for animation and VFX</title>
+<title>okulo by MAVYR Studio — frame-accurate review for animation and VFX</title>
 <meta name="description" content="Local-first desktop review workstation for animation and VFX: frame annotations, versions, compare and reports. Free for Windows.">
 <link rel="icon" href="assets/app-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=Bagel+Fat+One&family=Lemonada:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#060607; --ink:#E9E9EE; --muted:#8D8D99; --line:#26262B;
-  --orange:#EA580C; --amber:#FFA726; --gold:#FFE082; --ember:#2A1608;
-  --font:'Plus Jakarta Sans',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --bg:#060607; --ink:#ECECF1; --muted:#A3A3AF; --line:#26262B;
+  --orange:#F2F2F4; --amber:#FFFFFF; --gold:#FFFFFF; --ember:#18181B;
+  --font:'Readex Pro',system-ui,sans-serif; --display:'Bagel Fat One','Lemonada','Readex Pro',sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
 }
-html[dir=rtl]{ --font:'Tajawal','Plus Jakarta Sans',system-ui,sans-serif; }
+html[dir=rtl]{ --font:'Readex Pro',system-ui,sans-serif; }
+h1,h2,.card h3{font-family:var(--display)!important;font-weight:400!important;letter-spacing:-.01em!important}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:auto;background:var(--bg)}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 #world{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0}
-.vignette{position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(6,6,7,.55) 75%,rgba(6,6,7,.92) 100%)}
-.grain{position:fixed;inset:-50%;pointer-events:none;z-index:2;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 45%,rgba(6,6,7,.18) 30%,rgba(6,6,7,.62) 72%,rgba(6,6,7,.94) 100%)}
+.grain{display:none;position:fixed;inset:-50%;pointer-events:none;z-index:2;opacity:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
 
 /* nav */
 nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:14px;padding:8px 8px 8px 14px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(14,14,16,.55);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);width:min(860px,calc(100vw - 32px))}
 html[dir=rtl] nav{padding:8px 14px 8px 8px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:13.5px;letter-spacing:.02em;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:13.5px;letter-spacing:.02em;font-family:'Bagel Fat One',sans-serif;font-weight:400;font-size:20px;white-space:nowrap}
 .brand img{width:26px;height:26px;border-radius:7px}
-.ver{font-family:var(--mono);font-size:11px;color:var(--amber);border:1px solid rgba(234,88,12,.4);background:rgba(234,88,12,.1);padding:3px 8px;border-radius:999px;line-height:1}
+.ver{font-family:var(--mono);font-size:11px;color:var(--amber);border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);padding:3px 8px;border-radius:999px;line-height:1}
 .navlinks{display:flex;gap:4px;margin-inline-start:auto}
 .navlinks a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;padding:8px 12px;border-radius:999px;transition:.2s;line-height:1}
 .navlinks a:hover{color:var(--ink);background:rgba(255,255,255,.06)}
 .lang{height:34px;min-width:38px;padding:0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:transparent;color:var(--ink);font:700 13px var(--font);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.2s}
 .lang:hover{border-color:rgba(255,255,255,.3)}
-.get{height:34px;padding:0 16px;border-radius:999px;background:var(--orange);color:#1a0a02;font-weight:800;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;line-height:1;transition:.2s}
-.get:hover{background:#f26a1f;box-shadow:0 0 0 4px rgba(234,88,12,.18)}
-@media (max-width:760px){.navlinks{display:none}.brand span.name{display:none}}
+.get{height:34px;padding:0 16px;border-radius:999px;background:var(--orange);color:#0A0A0B;font-weight:800;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;line-height:1;transition:.2s}
+.get:hover{background:#F2F2F4;box-shadow:0 0 0 4px rgba(255,255,255,.18)}
+@media (max-width:760px){.navlinks{display:none}}
 
 /* chapters */
 main{position:relative;z-index:5}
@@ -48,28 +49,28 @@ html[dir=rtl] .chapter.right .stick{justify-content:flex-start}
 html[dir=rtl] .chapter:not(.right):not(.center) .stick{justify-content:flex-end}
 .chapter.center .stick{justify-content:center;text-align:center}
 .chapter.center .copy{max-width:760px;position:relative}
-.chapter.center .copy::before{content:"";position:absolute;inset:-90px -140px;z-index:-1;background:radial-gradient(ellipse at center,rgba(6,6,7,.82) 0%,rgba(6,6,7,.55) 45%,transparent 72%);pointer-events:none}
+.chapter.center .copy::before{content:"";position:absolute;inset:-90px -140px;z-index:-1;background:radial-gradient(ellipse at center,rgba(6,6,7,.9) 0%,rgba(6,6,7,.7) 45%,transparent 74%);pointer-events:none}
 .chapter:not(.center) .copy{position:relative}
-.chapter:not(.center) .copy::before{content:"";position:absolute;inset:-120px -160px;z-index:-1;background:radial-gradient(ellipse at center,rgba(6,6,7,.78) 0%,rgba(6,6,7,.5) 50%,transparent 75%);pointer-events:none}
+.chapter:not(.center) .copy::before{content:"";position:absolute;inset:-120px -160px;z-index:-1;background:radial-gradient(ellipse at center,rgba(6,6,7,.9) 0%,rgba(6,6,7,.68) 50%,transparent 76%);pointer-events:none}
 .copy h1,.copy h2,.copy .lede{text-shadow:0 2px 24px rgba(0,0,0,.65)}
 .copy{max-width:470px;pointer-events:auto;opacity:0;transform:translateY(30px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
 .copy.in{opacity:1;transform:none}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);padding:6px 12px 6px 10px;border:1px solid rgba(234,88,12,.35);border-radius:999px;background:rgba(234,88,12,.08);line-height:1}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);padding:6px 12px 6px 10px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:rgba(255,255,255,.08);line-height:1}
 html[dir=rtl] .eyebrow{font-family:var(--font);letter-spacing:0;font-weight:700;font-size:13px;padding:6px 10px 6px 12px}
-.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 0 rgba(234,88,12,.6);animation:rec 1.6s infinite}
-@keyframes rec{0%{box-shadow:0 0 0 0 rgba(234,88,12,.6)}70%{box-shadow:0 0 0 9px rgba(234,88,12,0)}100%{box-shadow:0 0 0 0 rgba(234,88,12,0)}}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 0 rgba(255,255,255,.6);animation:rec 1.6s infinite}
+@keyframes rec{0%{box-shadow:0 0 0 0 rgba(255,255,255,.6)}70%{box-shadow:0 0 0 9px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
 h1{font-size:clamp(44px,7.4vw,96px);line-height:.98;font-weight:800;letter-spacing:-.035em;margin:22px 0 18px}
 html[dir=rtl] h1{letter-spacing:0;line-height:1.15}
 h2{font-size:clamp(34px,4.6vw,60px);line-height:1.02;font-weight:800;letter-spacing:-.03em;margin:18px 0 14px}
 html[dir=rtl] h2{letter-spacing:0;line-height:1.2}
-.grad{background:linear-gradient(100deg,#FFE082 0%,#FFA726 35%,#EA580C 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.lede{font-size:clamp(16px,1.35vw,19px);line-height:1.6;color:#B9B9C4;max-width:560px}
+.grad{background:linear-gradient(100deg,#FFFFFF 0%,#D4D4D8 55%,#8A8A93 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:clamp(16px,1.3vw,19px);line-height:1.75;color:#CDCDD6;max-width:540px}
 .chapter.center .lede{margin:0 auto}
 .ctas{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
 .chapter.center .ctas{justify-content:center}
 .btn{height:52px;padding:0 24px;border-radius:14px;font-weight:800;font-size:15px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;line-height:1;transition:transform .2s,box-shadow .2s,background .2s;position:relative;overflow:hidden}
-.btn.primary{background:linear-gradient(180deg,#F26A1F,#EA580C);color:#1a0a02;box-shadow:0 10px 40px -10px rgba(234,88,12,.7)}
-.btn.primary:hover{transform:translateY(-2px);box-shadow:0 16px 50px -10px rgba(234,88,12,.85)}
+.btn.primary{background:linear-gradient(180deg,#F2F2F4,#F2F2F4);color:#0A0A0B;box-shadow:0 10px 40px -10px rgba(255,255,255,.7)}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 16px 50px -10px rgba(255,255,255,.85)}
 .btn.primary::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%);transform:translateX(-120%);animation:sheen 3.6s ease-in-out infinite}
 @keyframes sheen{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
 .btn.ghost{border:1px solid rgba(255,255,255,.16);color:var(--ink);background:rgba(255,255,255,.03);backdrop-filter:blur(8px)}
@@ -92,12 +93,12 @@ html[dir=rtl] .meta{font-family:var(--font);font-size:13px}
 #download{position:relative;z-index:5;padding:120px max(20px,5vw) 60px;background:linear-gradient(180deg,transparent,rgba(6,6,7,.85) 18%,rgba(6,6,7,.96))}
 .dl-head{text-align:center;max-width:720px;margin:0 auto 46px}
 .panel{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
-@media (max-width:900px){.panel{grid-template-columns:1fr}}
+.panel>*{min-width:0}@media (max-width:900px){.panel{grid-template-columns:1fr}}
 .card{border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(16,16,19,.94);padding:26px}
 .card h3{font-size:22px;font-weight:800;letter-spacing:-.01em}
 .sub{color:var(--muted);font-size:13.5px;margin-top:4px}
 #reel{width:100%;height:170px;display:block;margin:20px 0 6px;border-radius:12px;background:#0B0B0D;border:1px solid var(--line)}
-.reel-cap{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+.reel-cap{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;direction:ltr}
 html[dir=rtl] .reel-cap{font-family:var(--font);font-size:12px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
 .stat{border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;background:rgba(255,255,255,.02)}
@@ -123,6 +124,7 @@ html[dir=rtl] .stat b{text-align:right}
 footer{position:relative;z-index:5;padding:40px 24px 50px;text-align:center;color:var(--muted);font-size:13px;background:rgba(6,6,7,.96)}
 footer img{height:30px;opacity:.85;display:block;margin:0 auto 12px}
 @media (prefers-reduced-motion:reduce){.grain,.btn.primary::after,.eyebrow i{animation:none}}
+.brand .lid{transform-origin:50% 50%;transform-box:fill-box;animation:blink 5s cubic-bezier(.22,1,.36,1) infinite}.brand .pupil{animation:look 5s .2s ease-in-out infinite}@keyframes blink{0%,56%{transform:scaleY(1)}60%{transform:scaleY(.08)}66%,100%{transform:scaleY(1)}}@keyframes look{0%,70%{transform:none}76%,84%{transform:translateX(-2.2px)}90%,100%{transform:none}}
 </style>
 </head>
 <body>
@@ -131,8 +133,8 @@ footer img{height:30px;opacity:.85;display:block;margin:0 auto 12px}
 <div class="grain"></div>
 
 <nav>
-  <div class="brand"><img src="assets/app-icon.png" alt=""><span class="name">VIOLA STUDIO REVIEW</span></div>
-  <span class="ver" id="navVer">v1.0.3</span>
+  <div class="brand" aria-label="okulo"><span class="name" style="display:inline-flex;align-items:center"><svg viewBox="0 0 20 20" style="width:.6em;height:.6em;transform:translateY(.08em)"><g class="lid"><circle cx="10" cy="10" r="7.6" fill="none" stroke="#fff" stroke-width="4.2"/><circle class="pupil" cx="10" cy="10" r="1.9" fill="#fff"/></g></svg><span>kul</span><svg viewBox="0 0 20 20" style="width:.6em;height:.6em;transform:translateY(.08em)"><g class="lid"><circle cx="10" cy="10" r="7.6" fill="none" stroke="#fff" stroke-width="4.2"/><circle class="pupil" cx="10" cy="10" r="1.9" fill="#fff"/></g></svg></span></div>
+  <span class="ver" id="navVer">v1.0.4</span>
   <div class="navlinks">
     <a href="#ch-annotate" data-i18n="nav1">Annotate</a>
     <a href="#ch-versions" data-i18n="nav2">Versions</a>
@@ -153,7 +155,7 @@ footer img{height:30px;opacity:.85;display:block;margin:0 auto 12px}
         <a class="btn primary dl-link" href="#download"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span data-i18n="cta1">Download for Windows</span></a>
         <a class="btn ghost" href="#ch-annotate" data-i18n="cta2">Take the tour</a>
       </div>
-      <div class="meta" id="metaLine">Windows 10 &amp; 11 (64-bit) · Release 1.0.3 · 5.5 MB</div>
+      <div class="meta" id="metaLine">Windows 10 &amp; 11 (64-bit) · Release 1.0.4 · 6.3 MB</div>
     </div></div>
   </section>
 
@@ -206,13 +208,13 @@ footer img{height:30px;opacity:.85;display:block;margin:0 auto 12px}
   </div>
   <div class="panel">
     <div class="card">
-      <h3>VIOLA STUDIO REVIEW</h3>
-      <div class="sub"><span>MAVYR Studio</span> · <span id="relDate">2026-11-09</span></div>
+      <h3>okulo</h3>
+      <div class="sub"><span>MAVYR Studio</span> · <span id="relDate">2026-11-12</span></div>
       <canvas id="reel"></canvas>
       <div class="reel-cap"><span data-i18n="first">first release</span><span data-i18n="latest">latest</span></div>
       <div class="stats">
-        <div class="stat"><small data-i18n="sVer">Version</small><b id="stVer">1.0.3</b></div>
-        <div class="stat"><small data-i18n="sSize">Size</small><b id="stSize">5.5 MB</b></div>
+        <div class="stat"><small data-i18n="sVer">Version</small><b id="stVer">1.0.4</b></div>
+        <div class="stat"><small data-i18n="sSize">Size</small><b id="stSize">6.3 MB</b></div>
         <div class="stat"><small data-i18n="sDl">Downloads</small><b id="stDl">0</b></div>
       </div>
     </div>
@@ -220,10 +222,10 @@ footer img{height:30px;opacity:.85;display:block;margin:0 auto 12px}
       <div class="shot"><canvas id="shot"></canvas></div>
       <a class="btn primary install dl-link" id="dlBtn" href="https://github.com/abdelrhmanmahmoud9854-creator/viola-studio-review-releases/releases/latest/download/VIOLA_Studio_Review_Setup.exe">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.5 10.5 4.5v7H3zM11.5 4.4 21 3v8.5h-9.5zM3 12.5h7.5v7L3 18.5zM11.5 12.5H21V21l-9.5-1.4z"/></svg>
-        <span data-i18n="install">Install for Windows</span> <small id="dlVer">v1.0.3 · x64</small>
+        <span data-i18n="install">Install for Windows</span> <small id="dlVer">v1.0.4 · x64</small>
       </a>
       <div class="soon"><span data-i18n="mac">macOS · soon</span><span data-i18n="linux">Linux · soon</span></div>
-      <div class="sha"><small>SHA-256</small><code id="sha">E264E146D14565C5CC1640E163520318467E30A69C138C0D08D112D3A42A19B5</code><button class="copy-btn" id="copySha" data-i18n="copy">Copy</button></div>
+      <div class="sha"><small>SHA-256</small><code id="sha">80A7C75F0BB599367C7375C5EC8C34A7E2ABBBEA8D95B2783E3CA079E10F9D29</code><button class="copy-btn" id="copySha" data-i18n="copy">Copy</button></div>
       <div class="req">
         <div><span data-i18n="r1">System</span><span data-i18n="r1v">Windows 10 / 11, 64-bit</span></div>
         <div><span data-i18n="r2">Memory</span><span data-i18n="r2v">8 GB RAM recommended</span></div>
@@ -238,6 +240,7 @@ footer img{height:30px;opacity:.85;display:block;margin:0 auto 12px}
 <footer>
   <img src="assets/mavyr-logo.png" alt="MAVYR Studio">
   <div>© 2026 MAVYR Studio · <span data-i18n="foot">Made for people who care about every frame.</span></div>
+  <div style="margin-top:8px;font-size:11.5px;opacity:.7" data-i18n="legal">okulo and the blinking-eye logo are trademarks of MAVYR Studio. All rights reserved. Your videos never leave your computer.</div>
 </footer>
 
 <div class="tc" id="tc"><span id="tcVal">00:00:00:00</span><b id="tcScene">SC 00</b></div>
@@ -267,7 +270,7 @@ const T = { ar: {
   install:'سطّب على ويندوز', mac:'ماك · قريب', linux:'لينكس · قريب', copy:'انسخ',
   r1:'النظام', r1v:'ويندوز 10 / 11، 64-بت', r2:'الذاكرة', r2v:'8 جيجا رام أو أكتر', r3:'التسطيب', r3v:'لحسابك بس · من غير أدمن', r4:'الخصوصية', r4v:'أوفلاين · من غير حساب · من غير رفع',
   smart:'ويندوز ممكن يقولك <b><bdi dir="ltr">“Windows protected your PC”</bdi></b> لأن المثبّت لسه مش موقّع. دوس <b><bdi dir="ltr">More info → Run anyway</bdi></b>، وقارن كود SHA-256 اللي فوق لو عايز تتأكد إن الملف بتاعنا.',
-  foot:'معمول للناس اللي بيفرق معاها كل فريم.', scroll:'اعمل سكرول عشان الفيلم يمشي', copied:'اتنسخ'
+  foot:'معمول للناس اللي بيفرق معاها كل فريم.', legal:'اسم okulo ولوجو العين اللي بترمش علامات تجارية خاصة بـ MAVYR Studio. جميع الحقوق محفوظة. الفيديوهات بتاعتك عمرها ما بتخرج من جهازك.', scroll:'اعمل سكرول عشان الفيلم يمشي', copied:'اتنسخ'
 }};
 const EN = {}; document.querySelectorAll('[data-i18n]').forEach(e => EN[e.dataset.i18n] = e.textContent);
 document.querySelectorAll('[data-i18n-html]').forEach(e => EN[e.dataset.i18nHtml] = e.innerHTML);
@@ -277,7 +280,7 @@ let savedLang = null;
 try { savedLang = localStorage.getItem('vsr-lang'); } catch (e) {}
 lang = savedLang || ((navigator.language || '').startsWith('ar') ? 'ar' : 'en');
 function tr(k){ return lang === 'ar' ? (T.ar[k] ?? EN[k]) : EN[k]; }
-let metaInfo = { ver:'1.0.3', size:'5.5' };
+let metaInfo = { ver:'1.0.4', size:'5.5' };
 function renderMeta(){
   document.getElementById('metaLine').textContent = lang === 'ar'
     ? `ويندوز 10 و 11 (64-بت) · الإصدار ${metaInfo.ver} · ${metaInfo.size} ميجا`
@@ -307,7 +310,7 @@ document.getElementById('copySha').onclick = async (ev) => {
 /* ───────── live release data ───────── */
 const REPO = 'abdelrhmanmahmoud9854-creator/viola-studio-review-releases';
 const ASSET = 'VIOLA_Studio_Review_Setup.exe';
-let releases = [{ tag:'v1.0.3', date:'2026-11-09', downloads:0 }];
+let releases = [{ tag:'v1.0.4', date:'2026-11-12', downloads:0 }];
 function countUp(el, to){ const from = 0, t0 = performance.now(); (function f(t){ const k = Math.min(1,(t-t0)/1200); el.textContent = Math.round(from + (to-from)*(1-Math.pow(1-k,3))).toLocaleString(); if (k<1) requestAnimationFrame(f); })(t0); }
 fetch(`https://api.github.com/repos/${REPO}/releases`).then(r => r.ok ? r.json() : null).then(list => {
   if (!Array.isArray(list) || !list.length) return;
@@ -357,18 +360,18 @@ fetch(`https://api.github.com/repos/${REPO}/releases`).then(r => r.ok ? r.json()
       const grow = Math.min(1, Math.max(0, (s - i*0.15)/0.8)), e = 1-Math.pow(1-grow,3);
       const top = base - hgt*e;
       const lit = Math.max(0, 1 - Math.abs(sweep - (x/w))*6);
-      g.strokeStyle = `rgba(255,167,38,${.55+.45*lit})`; g.lineWidth = 2*d;
+      g.strokeStyle = `rgba(255,255,255,${.55+.45*lit})`; g.lineWidth = 2*d;
       g.beginPath(); g.moveTo(x,base); g.lineTo(x,top); g.stroke();
-      g.fillStyle = '#FFA726'; g.beginPath(); g.arc(x, top, (7+3*lit)*d*e, 0, 7); g.fill();
-      g.fillStyle = '#1a0a02'; g.font = `700 ${9*d}px "Plus Jakarta Sans"`; g.textAlign='center'; g.textBaseline='middle';
+      g.fillStyle = '#FFFFFF'; g.beginPath(); g.arc(x, top, (7+3*lit)*d*e, 0, 7); g.fill();
+      g.fillStyle = '#0A0A0B'; g.font = `700 ${9*d}px "Readex Pro"`; g.textAlign='center'; g.textBaseline='middle';
       if (e > .8) g.fillText(String(i+1), x, top+.5*d);
       g.fillStyle = '#8D8D99'; g.font = `600 ${10*d}px "JetBrains Mono"`; g.textBaseline='alphabetic';
       g.fillText(r.tag, x, base + 24*d);
     });
     // playhead sweep
     const px = pad + (w-2*pad)*Math.min(1,sweep);
-    g.fillStyle = 'rgba(255,224,130,.85)'; g.fillRect(px-d, 16*d, 2*d, base-16*d);
-    const gr = g.createLinearGradient(px-60*d,0,px,0); gr.addColorStop(0,'rgba(234,88,12,0)'); gr.addColorStop(1,'rgba(234,88,12,.18)');
+    g.fillStyle = 'rgba(255,255,255,.85)'; g.fillRect(px-d, 16*d, 2*d, base-16*d);
+    const gr = g.createLinearGradient(px-60*d,0,px,0); gr.addColorStop(0,'rgba(255,255,255,0)'); gr.addColorStop(1,'rgba(255,255,255,.18)');
     g.fillStyle = gr; g.fillRect(px-60*d, 16*d, 60*d, base-16*d);
     requestAnimationFrame(draw);
   }
@@ -397,7 +400,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 1.25));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 0.82;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x060607);
@@ -460,7 +463,7 @@ function makeClip(kind, seed){
     // burned-in slate: timecode + clip id
     const f = Math.floor(s*24);
     g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(0,H-26,W,26);
-    g.fillStyle = '#ffa726'; g.font = '600 13px "JetBrains Mono",monospace'; g.textBaseline = 'middle';
+    g.fillStyle = '#FFFFFF'; g.font = '600 13px "JetBrains Mono",monospace'; g.textBaseline = 'middle';
     g.fillText(`SH_${String(10+seed*10).padStart(3,'0')}  v0${1+seed%3}`, 12, H-13);
     g.textAlign = 'right'; g.fillText(`${String(Math.floor(f/86400)%24).padStart(2,'0')}:${String(Math.floor(f/1440)%60).padStart(2,'0')}:${String(Math.floor(f/24)%60).padStart(2,'0')}:${String(f%24).padStart(2,'0')}`, W-12, H-13);
     g.textAlign = 'left';
@@ -483,7 +486,7 @@ function makeFrame(kind, seed, w = 3.2){
   const bez = new THREE.Mesh(new THREE.PlaneGeometry(w+0.08, h+0.08), new THREE.MeshBasicMaterial({ color: 0x1b1b20 }));
   bez.position.z = -0.01; grp.add(bez);
   // glow card behind
-  const glow = new THREE.Mesh(new THREE.PlaneGeometry(w*1.5, h*1.6), new THREE.MeshBasicMaterial({ map: glowTex, color: 0xea580c, transparent: true, opacity: .22, depthWrite: false, blending: THREE.AdditiveBlending }));
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(w*1.5, h*1.6), new THREE.MeshBasicMaterial({ map: glowTex, color: 0xffffff, transparent: true, opacity: .22, depthWrite: false, blending: THREE.AdditiveBlending }));
   glow.position.z = -0.05; grp.add(glow);
   clips.push(clip);
   grp.userData = { clip, screen, glow, w, h };
@@ -521,7 +524,7 @@ function drawAnnot(p){
   const pts = [[300,170],[360,140],[450,150],[520,210],[540,300],[500,380],[420,410],[340,390],[300,330],[290,250],[300,170]];
   const k = Math.min(1, p*1.4) * (pts.length-1);
   g.lineCap = g.lineJoin = 'round';
-  for (const [wid, col] of [[26,'rgba(234,88,12,.28)'],[9,'#EA580C'],[2.5,'rgba(255,220,160,.9)']]){
+  for (const [wid, col] of [[26,'rgba(255,255,255,.28)'],[9,'#F2F2F4'],[2.5,'rgba(255,220,160,.9)']]){
     g.strokeStyle = col; g.lineWidth = wid; g.beginPath(); g.moveTo(...pts[0]);
     for (let i=1;i<=Math.floor(k);i++) g.lineTo(...pts[i]);
     const fi = Math.floor(k), fr = k - fi; if (fi < pts.length-1) g.lineTo(pts[fi][0]+(pts[fi+1][0]-pts[fi][0])*fr, pts[fi][1]+(pts[fi+1][1]-pts[fi][1])*fr);
@@ -529,34 +532,34 @@ function drawAnnot(p){
   }
   // arrow + pins
   const a = Math.max(0, Math.min(1, (p-.55)*3));
-  if (a>0){ g.strokeStyle = '#FFA726'; g.lineWidth = 7; g.beginPath(); g.moveTo(760, 120); g.lineTo(760-(760-575)*a, 120+(215-120)*a); g.stroke();
+  if (a>0){ g.strokeStyle = '#FFFFFF'; g.lineWidth = 7; g.beginPath(); g.moveTo(760, 120); g.lineTo(760-(760-575)*a, 120+(215-120)*a); g.stroke();
     if (a>.95){ g.beginPath(); g.moveTo(575,215); g.lineTo(600,190); g.moveTo(575,215); g.lineTo(606,222); g.stroke(); } }
   [[540,150,1,.45],[780,110,2,.7]].forEach(([x,y,n,at]) => { const q = Math.max(0, Math.min(1,(p-at)*5)); if (!q) return; const s = 1 + .3*Math.sin(Math.min(1,q)*Math.PI);
-    g.fillStyle = '#FFA726'; g.beginPath(); g.arc(x,y,22*q*s,0,7); g.fill(); g.fillStyle = '#1a0a02'; g.font = '800 22px "Plus Jakarta Sans"'; g.textAlign='center'; g.textBaseline='middle'; if (q>.6) g.fillText('#'+n, x, y+1);
-    if (q>.9){ g.fillStyle = 'rgba(32,20,12,.92)'; g.strokeStyle = '#7a3a10'; g.lineWidth = 2; const label = n===1?'Hold 4 frames longer':'Rim light too hot'; g.font = '600 20px "Plus Jakarta Sans"'; const tw = g.measureText(label).width + 28;
-      g.beginPath(); g.roundRect(x+30, y-20, tw, 40, 10); g.fill(); g.stroke(); g.fillStyle = '#FFE082'; g.textAlign = 'left'; g.fillText(label, x+44, y+1); } });
+    g.fillStyle = '#FFFFFF'; g.beginPath(); g.arc(x,y,22*q*s,0,7); g.fill(); g.fillStyle = '#0A0A0B'; g.font = '800 22px "Readex Pro"'; g.textAlign='center'; g.textBaseline='middle'; if (q>.6) g.fillText('#'+n, x, y+1);
+    if (q>.9){ g.fillStyle = 'rgba(18,18,22,.92)'; g.strokeStyle = '#8a8a93'; g.lineWidth = 2; const label = n===1?'Hold 4 frames longer':'Rim light too hot'; g.font = '600 20px "Readex Pro"'; const tw = g.measureText(label).width + 28;
+      g.beginPath(); g.roundRect(x+30, y-20, tw, 40, 10); g.fill(); g.stroke(); g.fillStyle = '#FFFFFF'; g.textAlign = 'left'; g.fillText(label, x+44, y+1); } });
   t.needsUpdate = true;
 }
 
 // 2) Versions: three takes that fan out in depth
 const versions = [0,1,2].map(i => { const f = makeFrame(0, 20+i, 4.4); f.position.set(-1.2, 0, -62); scene.add(f); return f; });
 const verLabels = versions.map((f,i) => { const c = document.createElement('canvas'); c.width = 256; c.height = 96; const g = c.getContext('2d');
-  g.fillStyle = i===2 ? '#EA580C' : 'rgba(20,20,24,.9)'; g.beginPath(); g.roundRect(8,18,240,60,30); g.fill(); g.strokeStyle = '#EA580C'; g.lineWidth = 3; g.stroke();
-  g.fillStyle = i===2 ? '#1a0a02' : '#FFA726'; g.font = '800 34px "Plus Jakarta Sans"'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(`v0${i+1}`, 128, 50);
+  g.fillStyle = i===2 ? '#F2F2F4' : 'rgba(20,20,24,.9)'; g.beginPath(); g.roundRect(8,18,240,60,30); g.fill(); g.strokeStyle = '#F2F2F4'; g.lineWidth = 3; g.stroke();
+  g.fillStyle = i===2 ? '#0A0A0B' : '#FFFFFF'; g.font = '800 34px "Readex Pro"'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(`v0${i+1}`, 128, 50);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   const m = new THREE.Mesh(new THREE.PlaneGeometry(1.1, .41), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); m.position.set(-1.6, 1.62, .03); f.add(m); return m; });
 
 // 3) Compare: two takes slide together with a wipe line
 const cmpA = makeFrame(1, 30, 5), cmpB = makeFrame(1, 31, 5);
 cmpA.position.set(-4, 0, -90); cmpB.position.set(4, 0, -90); scene.add(cmpA, cmpB);
-const wipe = new THREE.Mesh(new THREE.PlaneGeometry(.04, 2.9), new THREE.MeshBasicMaterial({ color: 0xFFE082, toneMapped: false })); wipe.position.set(0,0,-89.9); scene.add(wipe);
+const wipe = new THREE.Mesh(new THREE.PlaneGeometry(.04, 2.9), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false })); wipe.position.set(0,0,-89.9); scene.add(wipe);
 
 // 4) Reports: pages that fly out of a frame in an arc
 const reportFrame = makeFrame(4, 40, 5.2); reportFrame.position.set(-1.6, 0, -116); reportFrame.rotation.y = .3; scene.add(reportFrame);
 const pageTex = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 340; const g = c.getContext('2d');
-  g.fillStyle = '#f4f1ea'; g.fillRect(0,0,256,340); g.fillStyle = '#EA580C'; g.fillRect(18,18,90,10); g.fillStyle = '#c9c4b8';
+  g.fillStyle = '#f4f1ea'; g.fillRect(0,0,256,340); g.fillStyle = '#F2F2F4'; g.fillRect(18,18,90,10); g.fillStyle = '#c9c4b8';
   for (let i=0;i<6;i++) g.fillRect(18, 44+i*14, 180-(i%3)*40, 6);
-  g.fillStyle = '#222'; g.fillRect(18, 140, 220, 110); g.fillStyle = '#EA580C'; g.beginPath(); g.arc(150,180,10,0,7); g.fill();
+  g.fillStyle = '#222'; g.fillRect(18, 140, 220, 110); g.fillStyle = '#F2F2F4'; g.beginPath(); g.arc(150,180,10,0,7); g.fill();
   g.fillStyle = '#c9c4b8'; for (let i=0;i<4;i++) g.fillRect(18, 268+i*14, 200-(i%2)*60, 6);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
 const pages = Array.from({length:7}, (_,i) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.46), new THREE.MeshBasicMaterial({ map: pageTex, transparent: true, toneMapped: false, side: THREE.DoubleSide }));
@@ -568,7 +571,7 @@ function filmStrip(z0, len, y, phase){
   const c = document.createElement('canvas'); c.width = 1024; c.height = 64; const g = c.getContext('2d');
   g.fillStyle = '#121214'; g.fillRect(0,0,1024,64);
   for (let x=6;x<1024;x+=32){ g.fillStyle = '#2a2a2f'; g.fillRect(x, 6, 16, 9); g.fillRect(x, 49, 16, 9); }
-  for (let x=0;x<1024;x+=128){ g.fillStyle = 'rgba(234,88,12,.35)'; g.fillRect(x+6, 20, 116, 24); }
+  for (let x=0;x<1024;x+=128){ g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x+6, 20, 116, 24); }
   const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping; t.repeat.set(len/4, 1); t.colorSpace = THREE.SRGBColorSpace;
   const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide, toneMapped: false, transparent: true, opacity: .9 }));
   const pos = geo.attributes.position;
@@ -584,11 +587,11 @@ const dustN = mobile ? 900 : 2200;
 const dustGeo = new THREE.BufferGeometry(); const dp = new Float32Array(dustN*3);
 for (let i=0;i<dustN;i++){ dp[i*3] = (Math.random()-.5)*26; dp[i*3+1] = (Math.random()-.5)*14; dp[i*3+2] = -Math.random()*140; }
 dustGeo.setAttribute('position', new THREE.BufferAttribute(dp,3));
-const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ size: .05, color: 0xffc78a, transparent: true, opacity: .65, depthWrite: false, blending: THREE.AdditiveBlending, map: glowTex }));
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ size: .05, color: 0xffffff, transparent: true, opacity: .65, depthWrite: false, blending: THREE.AdditiveBlending, map: glowTex }));
 scene.add(dust);
 
 /* light beam from behind the camera like a projector */
-const beam = new THREE.Mesh(new THREE.ConeGeometry(9, 40, 48, 1, true), new THREE.MeshBasicMaterial({ color: 0xff9a3c, transparent: true, opacity: .035, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+const beam = new THREE.Mesh(new THREE.ConeGeometry(9, 40, 48, 1, true), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .035, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
 beam.rotation.x = Math.PI/2; scene.add(beam);
 
 /* ───── camera path driven by scroll ───── */
